@@ -38,29 +38,45 @@ h1 {
 }
 
 .controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: end;
+  display: grid;
+  gap: 0.9rem;
   margin: 1rem 0;
+}
+
+.field-group {
+  display: grid;
+  gap: 0.35rem;
 }
 
 label,
 input,
-button {
+button,
+textarea {
   font-size: 1rem;
 }
 
 input,
-button {
+button,
+textarea {
   border-radius: 8px;
   border: 1px solid #374151;
   padding: 0.55rem 0.75rem;
 }
 
-input {
+input,
+textarea {
   background: #0f172a;
   color: var(--text);
+}
+
+textarea {
+  resize: vertical;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
 }
 
 button {
@@ -69,6 +85,11 @@ button {
   border-color: transparent;
   color: #06152d;
   font-weight: 700;
+}
+
+.secondary-btn {
+  background: #334155;
+  color: var(--text);
 }
 
 button:hover {
@@ -88,6 +109,12 @@ button:hover {
   display: none;
 }
 
+.dedication-output {
+  margin: 0 0 1rem;
+  font-style: italic;
+  color: #c7d2fe;
+}
+
 #media-wrapper img,
 #media-wrapper iframe {
   width: 100%;
@@ -102,4 +129,41 @@ button:hover {
 
 #apod-explanation {
   line-height: 1.6;
+}
+
+@media print {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    background: #fff;
+    color: #111;
+  }
+
+  .container {
+    width: 100%;
+    margin: 0;
+    box-shadow: none;
+    border-radius: 0;
+    background: #fff;
+    padding: 0;
+  }
+
+  .controls,
+  .status {
+    display: none;
+  }
+
+  #media-wrapper iframe {
+    display: none;
+  }
+
+  #media-wrapper::after {
+    content: "Note: video entries cannot be embedded in PDF. Open in browser to view.";
+    display: block;
+    font-size: 0.9rem;
+    color: #444;
+    margin-top: 0.5rem;
+  }
 }

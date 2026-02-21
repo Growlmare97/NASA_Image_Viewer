@@ -14,9 +14,25 @@
       </header>
 
       <section class="controls" aria-label="APOD search controls">
-        <label for="date-input">Date</label>
-        <input id="date-input" type="date" min="1995-06-16" required />
-        <button id="search-btn" type="button">Find Picture</button>
+        <div class="field-group">
+          <label for="date-input">Date</label>
+          <input id="date-input" type="date" min="1995-06-16" required />
+        </div>
+
+        <div class="field-group dedication-group">
+          <label for="dedication-input">Dedication</label>
+          <textarea
+            id="dedication-input"
+            rows="2"
+            maxlength="240"
+            placeholder="For Nicole — still looking up at the same stars"
+          ></textarea>
+        </div>
+
+        <div class="actions">
+          <button id="search-btn" type="button">Find Picture</button>
+          <button id="print-btn" type="button" class="secondary-btn">Save / Print PDF</button>
+        </div>
       </section>
 
       <section id="status" class="status" role="status" aria-live="polite"></section>
@@ -24,6 +40,7 @@
       <article id="result" class="result hidden" aria-label="NASA picture result">
         <h2 id="apod-title"></h2>
         <p id="apod-date" class="apod-date"></p>
+        <p id="dedication-output" class="dedication-output hidden"></p>
         <div id="media-wrapper"></div>
         <p id="apod-explanation"></p>
       </article>

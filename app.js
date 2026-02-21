@@ -2,11 +2,14 @@ const API_URL = "https://api.nasa.gov/planetary/apod";
 const API_KEY = "DEMO_KEY";
 
 const dateInput = document.getElementById("date-input");
+const dedicationInput = document.getElementById("dedication-input");
 const searchBtn = document.getElementById("search-btn");
+const printBtn = document.getElementById("print-btn");
 const statusEl = document.getElementById("status");
 const resultEl = document.getElementById("result");
 const titleEl = document.getElementById("apod-title");
 const dateEl = document.getElementById("apod-date");
+const dedicationOutput = document.getElementById("dedication-output");
 const mediaWrapper = document.getElementById("media-wrapper");
 const explanationEl = document.getElementById("apod-explanation");
 
@@ -20,11 +23,26 @@ function setStatus(message) {
 
 function resetResult() {
   mediaWrapper.innerHTML = "";
+  dedicationOutput.textContent = "";
+  dedicationOutput.classList.add("hidden");
   resultEl.classList.add("hidden");
+}
+
+function renderDedication() {
+  const dedication = dedicationInput.value.trim();
+  if (!dedication) {
+    dedicationOutput.textContent = "";
+    dedicationOutput.classList.add("hidden");
+    return;
+  }
+
+  dedicationOutput.textContent = `Dedication: ${dedication}`;
+  dedicationOutput.classList.remove("hidden");
 }
 
 function renderMedia(data) {
   mediaWrapper.innerHTML = "";
+
   if (data.media_type === "image") {
     const img = document.createElement("img");
     img.src = data.url;
@@ -64,22 +82,42 @@ async function fetchApod(date) {
     titleEl.textContent = data.title;
     dateEl.textContent = data.date;
     explanationEl.textContent = data.explanation;
+    renderDedication();
     renderMedia(data);
 
     resultEl.classList.remove("hidden");
-    setStatus("Done.");
+    setStatus("Done. You can print/save as PDF.");
   } catch (error) {
     setStatus(`Error: ${error.message}`);
   }
 }
 
-searchBtn.addEventListener("click", () => {
+function handleSearch() {
   if (!dateInput.value) {
     setStatus("Please pick a date.");
     return;
   }
 
   fetchApod(dateInput.value);
+}
+
+searchBtn.addEventListener("click", handleSearch);
+
+printBtn.addEventListener("click", () => {
+  if (resultEl.classList.contains("hidden")) {
+    setStatus("Load a picture first, then print/save as PDF.");
+    return;
+  }
+
+  renderDedication();
+  setStatus("Opening print dialog...");
+  window.print();
+});
+
+dedicationInput.addEventListener("input", () => {
+  if (!resultEl.classList.contains("hidden")) {
+    renderDedication();
+  }
 });
 
 fetchApod(dateInput.value);
