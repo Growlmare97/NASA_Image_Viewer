@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NASA Memory Viewer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>NASA Picture of the Day</h1>
+        <p class="subtitle">Choose any date and revisit the sky. ✨</p>
+      </header>
+
+      <section class="controls" aria-label="APOD search controls">
+        <div class="field-group">
+          <label for="date-input">Date</label>
+          <input id="date-input" type="date" min="1995-06-16" required />
+        </div>
+
+        <div class="field-group dedication-group">
+          <label for="dedication-input">Dedication</label>
+          <textarea
+            id="dedication-input"
+            rows="2"
+            maxlength="240"
+            placeholder="For Nicole — still looking up at the same stars"
+          ></textarea>
+        </div>
+
+        <div class="actions">
+          <button id="search-btn" type="button">Find Picture</button>
+          <button id="print-btn" type="button" class="secondary-btn">Save / Print PDF</button>
+        </div>
+      </section>
+
+      <section id="status" class="status" role="status" aria-live="polite"></section>
+
+      <article id="result" class="result hidden" aria-label="NASA picture result">
+        <h2 id="apod-title"></h2>
+        <p id="apod-date" class="apod-date"></p>
+        <p id="dedication-output" class="dedication-output hidden"></p>
+        <div id="media-wrapper"></div>
+        <p id="apod-explanation"></p>
+      </article>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

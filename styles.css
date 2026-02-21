@@ -1,0 +1,169 @@
+:root {
+  color-scheme: dark;
+  --bg: #0b1120;
+  --card: #111827;
+  --text: #f9fafb;
+  --muted: #9ca3af;
+  --accent: #60a5fa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: radial-gradient(circle at top, #1f2937, var(--bg));
+  color: var(--text);
+}
+
+.container {
+  width: min(900px, 92vw);
+  margin: 2rem auto;
+  padding: 1.25rem;
+  background: color-mix(in oklab, var(--card), black 15%);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 35%);
+}
+
+h1 {
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  margin-top: 0;
+  color: var(--muted);
+}
+
+.controls {
+  display: grid;
+  gap: 0.9rem;
+  margin: 1rem 0;
+}
+
+.field-group {
+  display: grid;
+  gap: 0.35rem;
+}
+
+label,
+input,
+button,
+textarea {
+  font-size: 1rem;
+}
+
+input,
+button,
+textarea {
+  border-radius: 8px;
+  border: 1px solid #374151;
+  padding: 0.55rem 0.75rem;
+}
+
+input,
+textarea {
+  background: #0f172a;
+  color: var(--text);
+}
+
+textarea {
+  resize: vertical;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+button {
+  cursor: pointer;
+  background: var(--accent);
+  border-color: transparent;
+  color: #06152d;
+  font-weight: 700;
+}
+
+.secondary-btn {
+  background: #334155;
+  color: var(--text);
+}
+
+button:hover {
+  filter: brightness(1.07);
+}
+
+.status {
+  min-height: 1.5rem;
+  color: var(--muted);
+}
+
+.result {
+  margin-top: 1rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.dedication-output {
+  margin: 0 0 1rem;
+  font-style: italic;
+  color: #c7d2fe;
+}
+
+#media-wrapper img,
+#media-wrapper iframe {
+  width: 100%;
+  max-height: 70vh;
+  border-radius: 10px;
+  border: 1px solid #334155;
+}
+
+.apod-date {
+  color: var(--muted);
+}
+
+#apod-explanation {
+  line-height: 1.6;
+}
+
+@media print {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    background: #fff;
+    color: #111;
+  }
+
+  .container {
+    width: 100%;
+    margin: 0;
+    box-shadow: none;
+    border-radius: 0;
+    background: #fff;
+    padding: 0;
+  }
+
+  .controls,
+  .status {
+    display: none;
+  }
+
+  #media-wrapper iframe {
+    display: none;
+  }
+
+  #media-wrapper::after {
+    content: "Note: video entries cannot be embedded in PDF. Open in browser to view.";
+    display: block;
+    font-size: 0.9rem;
+    color: #444;
+    margin-top: 0.5rem;
+  }
+}
