@@ -1,6 +1,6 @@
 :root {
   color-scheme: dark;
-  --bg: #0b1120;
+  --bg: #030712;
   --card: #111827;
   --text: #f9fafb;
   --muted: #9ca3af;
@@ -14,33 +14,42 @@
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   background: radial-gradient(circle at top, #1f2937, var(--bg));
   color: var(--text);
 }
 
 .container {
-  width: min(900px, 92vw);
+  width: min(1050px, 94vw);
   margin: 2rem auto;
-  padding: 1.25rem;
+}
+
+.card {
+  padding: 1rem;
   background: color-mix(in oklab, var(--card), black 15%);
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgb(0 0 0 / 35%);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 28%);
+  margin-bottom: 1rem;
 }
 
 h1 {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
-.subtitle {
+h2 {
   margin-top: 0;
+}
+
+.subtitle,
+.meta,
+.apod-date {
   color: var(--muted);
 }
 
-.controls {
+.controls,
+.subscription {
   display: grid;
-  gap: 0.9rem;
-  margin: 1rem 0;
+  gap: 0.8rem;
 }
 
 .field-group {
@@ -48,35 +57,35 @@ h1 {
   gap: 0.35rem;
 }
 
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
 label,
 input,
 button,
-textarea {
+textarea,
+select {
   font-size: 1rem;
 }
 
 input,
 button,
-textarea {
-  border-radius: 8px;
+textarea,
+select {
+  border-radius: 10px;
   border: 1px solid #374151;
   padding: 0.55rem 0.75rem;
 }
 
 input,
-textarea {
+textarea,
+select {
   background: #0f172a;
   color: var(--text);
-}
-
-textarea {
-  resize: vertical;
-}
-
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
 }
 
 button {
@@ -87,26 +96,33 @@ button {
   font-weight: 700;
 }
 
-.secondary-btn {
+.secondary-btn,
+.open-btn {
   background: #334155;
   color: var(--text);
 }
 
-button:hover {
-  filter: brightness(1.07);
-}
-
 .status {
-  min-height: 1.5rem;
-  color: var(--muted);
-}
-
-.result {
-  margin-top: 1rem;
+  min-height: 1.4rem;
+  margin-bottom: 0.9rem;
 }
 
 .hidden {
   display: none;
+}
+
+.result-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.topic-pill {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  border: 1px solid #4b5563;
 }
 
 .dedication-output {
@@ -123,47 +139,74 @@ button:hover {
   border: 1px solid #334155;
 }
 
-.apod-date {
-  color: var(--muted);
-}
-
 #apod-explanation {
   line-height: 1.6;
 }
 
-@media print {
-  :root {
-    color-scheme: light;
-  }
+.gallery-controls {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
 
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.8rem;
+}
+
+.gallery-card {
+  background: #0b1222;
+  border: 1px solid #263246;
+  border-radius: 12px;
+  padding: 0.7rem;
+}
+
+.gallery-card img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 0.4rem;
+}
+
+.gallery-card h3 {
+  margin: 0.2rem 0;
+  font-size: 1rem;
+}
+
+@media print {
   body {
     background: #fff;
     color: #111;
   }
 
-  .container {
-    width: 100%;
-    margin: 0;
-    box-shadow: none;
-    border-radius: 0;
-    background: #fff;
-    padding: 0;
+  .controls,
+  .subscription,
+  .gallery,
+  #favourites-grid,
+  .status,
+  #favorite-btn,
+  #print-btn,
+  .open-btn,
+  #load-gallery-btn {
+    display: none !important;
   }
 
-  .controls,
-  .status {
-    display: none;
+  .card {
+    box-shadow: none;
+    border: 0;
+    background: #fff;
+    margin: 0;
+    padding: 0;
   }
 
   #media-wrapper iframe {
     display: none;
   }
 
-  #media-wrapper::after {
-    content: "Note: video entries cannot be embedded in PDF. Open in browser to view.";
-    display: block;
-    font-size: 0.9rem;
-    color: #444;
-    margin-top: 0.5rem;
+  #apod-explanation {
+    font-size: 12pt;
   }
 }
