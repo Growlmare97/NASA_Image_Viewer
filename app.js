@@ -1,5 +1,5 @@
 const API_URL = "https://api.nasa.gov/planetary/apod";
-const API_KEY = "DEMO_KEY";
+const API_KEY = "MKUgyKuvV4B5CjxAZsNIDVHZIcZacZP1c84QS4kF";
 
 const dateInput = document.getElementById("date-input");
 const dedicationInput = document.getElementById("dedication-input");
