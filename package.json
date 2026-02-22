@@ -5,6 +5,6 @@
   "type": "module",
   "scripts": {
     "check": "node --check app.js",
-    "check:functions": "node --check netlify/functions/subscribe.mjs && node --check netlify/functions/unsubscribe.mjs && node --check netlify/functions/send-test-email.mjs && node --check netlify/functions/daily-apod-email.mjs"
+    "check:functions": "node --check netlify/functions/subscribe.mjs && node --check netlify/functions/unsubscribe.mjs && node --check netlify/functions/send-test-email.mjs && node --check netlify/functions/daily-apod-email.mjs && node --check netlify/functions/email-status.mjs"
   }
 }

@@ -11,6 +11,7 @@ const emailInput = document.getElementById("email-input");
 const subscribeBtn = document.getElementById("subscribe-btn");
 const unsubscribeBtn = document.getElementById("unsubscribe-btn");
 const testEmailBtn = document.getElementById("test-email-btn");
+const subscriptionMeta = document.getElementById("subscription-meta");
 const daysInput = document.getElementById("days-input");
 const topicFilter = document.getElementById("topic-filter");
 const loadGalleryBtn = document.getElementById("load-gallery-btn");
@@ -261,6 +262,32 @@ async function sendTestEmail() {
   }
 }
 
+
+async function checkEmailConnection() {
+  try {
+    const response = await fetch("/.netlify/functions/email-status");
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Email status check failed");
+    }
+
+    if (data.connected) {
+      subscriptionMeta.textContent = "Subscribe to receive the daily APOD email. ✅ Email provider is connected.";
+      return;
+    }
+
+    const missing = Object.entries(data.checks)
+      .filter(([, ok]) => !ok)
+      .map(([name]) => name)
+      .join(", ");
+
+    subscriptionMeta.textContent = `Subscribe to receive the daily APOD email. ⚠️ Setup incomplete: missing ${missing}.`;
+  } catch (_error) {
+    subscriptionMeta.textContent = "Subscribe to receive the daily APOD email. ⚠️ Netlify email functions unavailable in local static mode.";
+  }
+}
+
 function loadSubscription() {
   const saved = JSON.parse(localStorage.getItem(SUBSCRIPTION_KEY) || "null");
   if (saved?.email) {
@@ -321,6 +348,7 @@ dedicationInput.addEventListener("input", () => {
 });
 
 loadSubscription();
+checkEmailConnection();
 renderFavourites();
 loadGallery();
 fetchApod(dateInput.value);

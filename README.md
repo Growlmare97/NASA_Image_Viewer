@@ -29,6 +29,7 @@ This repository includes Netlify Functions:
 - `/.netlify/functions/unsubscribe`
 - `/.netlify/functions/send-test-email`
 - `/.netlify/functions/daily-apod-email` (scheduled daily at `13:00 UTC`)
+- `/.netlify/functions/email-status` (verifies provider/env setup from the UI)
 
 ### 1) Create accounts / keys
 
@@ -69,10 +70,11 @@ In **Site settings → Environment variables**, add:
 ### 5) Test in production
 
 1. Open your deployed site.
-2. Enter your email and click **Subscribe**.
-3. Click **Send Test Email**.
-4. Confirm delivery in inbox/spam.
-5. Verify scheduled sends in Netlify function logs (`daily-apod-email`).
+2. Check the **Connection status** text in the subscription card (it should show connected).
+3. Enter your email and click **Subscribe**.
+4. Click **Send Test Email**.
+5. Confirm delivery in inbox/spam.
+6. Verify scheduled sends in Netlify function logs (`daily-apod-email`).
 
 
 ## Managed email provider (done-for-you sending)
