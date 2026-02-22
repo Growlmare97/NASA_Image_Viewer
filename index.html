@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NASA Memory Viewer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>NASA Picture of the Day</h1>
+        <p class="subtitle">Choose any date, keep the memory, and build your own cosmos collection. ✨</p>
+      </header>
+
+      <section class="controls card" aria-label="APOD search controls">
+        <div class="field-group">
+          <label for="date-input">Date</label>
+          <input id="date-input" type="date" min="1995-06-16" required />
+        </div>
+
+        <div class="field-group dedication-group">
+          <label for="dedication-input">Dedication</label>
+          <textarea
+            id="dedication-input"
+            rows="2"
+            maxlength="240"
+            placeholder="For someone special — still looking at the same stars"
+          ></textarea>
+        </div>
+
+        <div class="actions">
+          <button id="search-btn" type="button">Find Picture</button>
+          <button id="favorite-btn" type="button" class="secondary-btn">☆ Save to Favourites</button>
+          <button id="print-btn" type="button" class="secondary-btn">Export Card (PDF)</button>
+        </div>
+      </section>
+
+      <section class="subscription card" aria-label="email subscription controls">
+        <h2>Daily Email Subscription</h2>
+        <p class="meta">Subscribe and we save your preference locally. Connect this to a managed email provider (like Resend) to automate delivery for you.</p>
+        <div class="actions">
+          <input id="email-input" type="email" placeholder="you@example.com" aria-label="Email address" />
+          <button id="subscribe-btn" type="button">Subscribe</button>
+          <button id="unsubscribe-btn" type="button" class="secondary-btn">Unsubscribe</button>
+          <button id="test-email-btn" type="button" class="secondary-btn">Send Test Email</button>
+        </div>
+      </section>
+
+      <section id="status" class="status" role="status" aria-live="polite"></section>
+
+      <article id="result" class="result card hidden" aria-label="NASA picture result">
+        <div class="result-head">
+          <h2 id="apod-title"></h2>
+          <span id="topic-pill" class="topic-pill"></span>
+        </div>
+        <p id="apod-date" class="apod-date"></p>
+        <p id="dedication-output" class="dedication-output hidden"></p>
+        <div id="media-wrapper"></div>
+        <p id="apod-explanation"></p>
+      </article>
+
+      <section class="gallery card" aria-label="gallery controls and list">
+        <div class="result-head">
+          <h2>Gallery</h2>
+          <div class="gallery-controls">
+            <label for="days-input">Last days</label>
+            <select id="days-input">
+              <option value="7">7</option>
+              <option value="14" selected>14</option>
+              <option value="30">30</option>
+            </select>
+            <label for="topic-filter">Topic</label>
+            <select id="topic-filter">
+              <option value="All">All</option>
+            </select>
+            <button id="load-gallery-btn" type="button">Load Gallery</button>
+          </div>
+        </div>
+        <div id="gallery-grid" class="gallery-grid"></div>
+      </section>
+
+      <section class="card" aria-label="favourites">
+        <h2>Favourites</h2>
+        <div id="favourites-grid" class="gallery-grid"></div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
