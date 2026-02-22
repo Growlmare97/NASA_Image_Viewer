@@ -1,0 +1,10 @@
+{
+  "name": "nasa-image-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check app.js",
+    "check:functions": "node --check netlify/functions/subscribe.mjs && node --check netlify/functions/unsubscribe.mjs && node --check netlify/functions/send-test-email.mjs && node --check netlify/functions/daily-apod-email.mjs"
+  }
+}

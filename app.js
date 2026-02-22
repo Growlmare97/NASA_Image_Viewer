@@ -1,5 +1,5 @@
 const API_URL = "https://api.nasa.gov/planetary/apod";
-const API_KEY = "MKUgyKuvV4B5CjxAZsNIDVHZIcZacZP1c84QS4kF";
+const API_KEY = "DEMO_KEY";
 const FAVORITES_KEY = "nasa-favorites";
 const SUBSCRIPTION_KEY = "nasa-subscription";
 const dateInput = document.getElementById("date-input");
@@ -10,6 +10,7 @@ const printBtn = document.getElementById("print-btn");
 const emailInput = document.getElementById("email-input");
 const subscribeBtn = document.getElementById("subscribe-btn");
 const unsubscribeBtn = document.getElementById("unsubscribe-btn");
+const testEmailBtn = document.getElementById("test-email-btn");
 const daysInput = document.getElementById("days-input");
 const topicFilter = document.getElementById("topic-filter");
 const loadGalleryBtn = document.getElementById("load-gallery-btn");
@@ -207,19 +208,56 @@ async function loadGallery() {
   }
 }
 
-function handleSubscription(save = true) {
+async function handleSubscription(save = true) {
   const email = emailInput.value.trim();
   if (!email || !email.includes("@")) {
     setStatus("Enter a valid email address.");
     return;
   }
 
-  if (save) {
-    localStorage.setItem(SUBSCRIPTION_KEY, JSON.stringify({ email, active: true, frequency: "daily" }));
-    setStatus(`Subscribed ${email}. Next step: connect EmailJS/Resend to send daily APOD emails automatically.`);
-  } else {
-    localStorage.setItem(SUBSCRIPTION_KEY, JSON.stringify({ email, active: false, frequency: "daily" }));
-    setStatus(`Unsubscribed ${email}.`);
+  const endpoint = save ? "/.netlify/functions/subscribe" : "/.netlify/functions/unsubscribe";
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Subscription request failed");
+    }
+
+    localStorage.setItem(SUBSCRIPTION_KEY, JSON.stringify({ email, active: save, frequency: "daily" }));
+    setStatus(data.message);
+  } catch (error) {
+    setStatus(`Error: ${error.message}`);
+  }
+}
+
+async function sendTestEmail() {
+  const email = emailInput.value.trim();
+  if (!email || !email.includes("@")) {
+    setStatus("Enter a valid email address first.");
+    return;
+  }
+
+  try {
+    const response = await fetch("/.netlify/functions/send-test-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to send test email");
+    }
+
+    setStatus(data.message);
+  } catch (error) {
+    setStatus(`Error: ${error.message}`);
   }
 }
 
@@ -262,6 +300,7 @@ printBtn.addEventListener("click", () => {
 
 subscribeBtn.addEventListener("click", () => handleSubscription(true));
 unsubscribeBtn.addEventListener("click", () => handleSubscription(false));
+testEmailBtn.addEventListener("click", sendTestEmail);
 
 for (const target of [galleryGrid, favouritesGrid]) {
   target.addEventListener("click", (event) => {
