@@ -74,6 +74,15 @@ In **Site settings → Environment variables**, add:
 4. Confirm delivery in inbox/spam.
 5. Verify scheduled sends in Netlify function logs (`daily-apod-email`).
 
+
+## Managed email provider (done-for-you sending)
+
+If you want a provider to handle delivery infrastructure for you, use **Resend** (already integrated in this project).
+
+- Resend handles deliverability infrastructure, retries, and dashboards.
+- You only need to verify a sender domain and set `RESEND_API_KEY` + `EMAIL_FROM` in Netlify.
+- Then Netlify scheduled function `daily-apod-email` sends automatically each day.
+
 ## API notes
 
 For front-end APOD browsing, this app currently uses NASA's `DEMO_KEY` in `app.js`.
