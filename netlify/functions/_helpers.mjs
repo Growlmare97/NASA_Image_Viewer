@@ -2,14 +2,13 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export function json(statusCode, body) {
-  return {
-    statusCode,
+  return new Response(JSON.stringify(body), {
+    status: statusCode,
     headers: {
       "content-type": "application/json; charset=utf-8",
       "cache-control": "no-store"
-    },
-    body: JSON.stringify(body)
-  };
+    }
+  });
 }
 
 export function normalizeEmail(email = "") {
