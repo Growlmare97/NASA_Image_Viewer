@@ -6,6 +6,9 @@
     <title>NASA Memory Viewer</title>
     <link rel="icon" href="https://www.nasa.gov/favicon.ico" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet" />
   </head>
   <body>
     <main class="container">
@@ -62,6 +65,14 @@
       <section id="status" class="status" role="status" aria-live="polite"></section>
 
       <article id="result" class="result card hidden" aria-label="NASA picture result">
+        <!-- Print-only decorative elements -->
+        <div class="print-ornament print-corner print-corner-tl"></div>
+        <div class="print-ornament print-corner print-corner-tr"></div>
+        <div class="print-ornament print-corner print-corner-bl"></div>
+        <div class="print-ornament print-corner print-corner-br"></div>
+        <div class="print-ornament print-header-ornament">&#10043;</div>
+        <p class="print-ornament print-label">NASA Astronomy Picture of the Day</p>
+
         <div class="result-head">
           <h2 id="apod-title"></h2>
           <span id="topic-pill" class="topic-pill"></span>
@@ -70,6 +81,9 @@
         <p id="dedication-output" class="dedication-output hidden"></p>
         <div id="media-wrapper"></div>
         <p id="apod-explanation"></p>
+
+        <div class="print-ornament print-footer-ornament">&#10043;</div>
+        <p class="print-ornament print-footer-text">A Cosmic Memory</p>
       </article>
 
       <section class="gallery card" aria-label="gallery controls and list">

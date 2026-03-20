@@ -451,18 +451,39 @@ button:active {
   }
 }
 
-/* ── Print ───────────────────────────────────────────────────── */
+/* ── Print-only elements (hidden on screen) ──────────────────── */
+
+.print-ornament {
+  display: none !important;
+}
+
+/* ── Print — Navy & Gold Invitation Card ─────────────────────── */
 
 @media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
   body {
-    background: #fff !important;
-    color: #111;
+    margin: 0;
+    background: #0f1442 !important;
+    color: #d4af37;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
   }
 
   body::before {
     display: none;
   }
 
+  /* ── Hide everything except the result card ── */
+  header,
   .controls,
   .subscription,
   .gallery,
@@ -472,31 +493,211 @@ button:active {
   #print-btn,
   .open-btn,
   #load-gallery-btn,
-  .nasa-logo {
+  .nasa-logo,
+  .topic-pill {
     display: none !important;
   }
 
-  .card {
-    box-shadow: none;
-    border: 0;
-    background: #fff;
-    backdrop-filter: none;
+  .container {
+    width: 100%;
+    max-width: 100%;
     margin: 0;
     padding: 0;
   }
 
-  h1 {
-    background: none;
-    -webkit-text-fill-color: #111;
-    color: #111;
+  /* ── The main card — invitation style ── */
+  .result.card {
+    position: relative;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    background: #0f1442 !important;
+    backdrop-filter: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
+    padding: 3rem 4rem;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  /* ── Gold inner border frame ── */
+  .result.card::before {
+    content: '';
+    position: absolute;
+    inset: 20px;
+    border: 2px solid #d4af37;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  .result.card::after {
+    content: '';
+    position: absolute;
+    inset: 26px;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+
+  /* ── Corner ornaments ── */
+  .print-ornament {
+    display: block !important;
+  }
+
+  .print-corner {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-color: #d4af37;
+    border-style: solid;
+    border-width: 0;
+  }
+
+  .print-corner-tl {
+    top: 34px;
+    left: 34px;
+    border-top-width: 3px;
+    border-left-width: 3px;
+  }
+
+  .print-corner-tr {
+    top: 34px;
+    right: 34px;
+    border-top-width: 3px;
+    border-right-width: 3px;
+  }
+
+  .print-corner-bl {
+    bottom: 34px;
+    left: 34px;
+    border-bottom-width: 3px;
+    border-left-width: 3px;
+  }
+
+  .print-corner-br {
+    bottom: 34px;
+    right: 34px;
+    border-bottom-width: 3px;
+    border-right-width: 3px;
+  }
+
+  /* ── Top ornament star ── */
+  .print-header-ornament {
+    font-size: 28pt;
+    color: #d4af37;
+    letter-spacing: 0.3em;
+    margin-bottom: 0.3rem;
+    order: -3;
+  }
+
+  /* ── "NASA Astronomy Picture of the Day" label ── */
+  .print-label {
+    font-family: 'Cinzel', 'Georgia', serif;
+    font-size: 10pt;
+    font-weight: 400;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(212, 175, 55, 0.7);
+    margin-bottom: 1.2rem;
+    order: -2;
+  }
+
+  /* ── Title ── */
+  .result-head {
+    display: block;
+    order: -1;
+    margin-bottom: 0.3rem;
+  }
+
+  .result-head h2,
+  #apod-title {
+    font-family: 'Cinzel', 'Georgia', serif !important;
+    font-size: 22pt !important;
+    font-weight: 700;
+    color: #d4af37 !important;
+    letter-spacing: 0.06em;
+    line-height: 1.3;
+    margin: 0;
+  }
+
+  /* ── Date ── */
+  #apod-date,
+  .apod-date {
+    font-family: 'Cinzel', 'Georgia', serif !important;
+    font-size: 14pt !important;
+    color: #d4af37 !important;
+    letter-spacing: 0.15em;
+    margin: 0.4rem 0 0.8rem;
+    order: 0;
+  }
+
+  /* ── Dedication ── */
+  .dedication-output {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-size: 12pt;
+    font-style: italic;
+    color: rgba(212, 175, 55, 0.85) !important;
+    border-left: 2px solid rgba(212, 175, 55, 0.4) !important;
+    padding-left: 14px;
+    margin: 0.6rem auto 1rem;
+    max-width: 500px;
+    order: 1;
+  }
+
+  /* ── Image ── */
+  #media-wrapper {
+    order: 2;
+    margin: 0.8rem auto;
+    max-width: 480px;
+    border-radius: 0 !important;
+  }
+
+  #media-wrapper img {
+    max-height: 42vh;
+    width: auto;
+    max-width: 100%;
+    border-radius: 4px !important;
+    border: 2px solid #d4af37 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   }
 
   #media-wrapper iframe {
     display: none;
   }
 
+  /* ── Explanation ── */
   #apod-explanation {
-    font-size: 12pt;
-    color: #333;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-size: 10pt;
+    line-height: 1.6;
+    color: rgba(212, 175, 55, 0.65) !important;
+    max-width: 560px;
+    margin: 0.8rem auto 0;
+    text-align: center;
+    order: 3;
+  }
+
+  /* ── Bottom ornament ── */
+  .print-footer-ornament {
+    font-size: 18pt;
+    color: #d4af37;
+    letter-spacing: 0.3em;
+    margin-top: 1rem;
+    order: 4;
+  }
+
+  .print-footer-text {
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-size: 9pt;
+    font-style: italic;
+    letter-spacing: 0.2em;
+    color: rgba(212, 175, 55, 0.5);
+    order: 5;
+    margin-top: 0.2rem;
   }
 }
