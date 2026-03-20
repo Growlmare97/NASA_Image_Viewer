@@ -176,7 +176,7 @@ async function fetchApod(date) {
     updateFavoriteButton();
 
     resultEl.classList.remove("hidden");
-    setStatus("Loaded. You can save to favourites, browse the gallery, or export as PDF.");
+    setStatus("Loaded. You can save to favourites, browse the gallery, or export as a card.");
   } catch (error) {
     setStatus(`Error: ${error.message}`);
   }
@@ -319,14 +319,247 @@ favoriteBtn.addEventListener("click", () => {
   renderFavourites();
 });
 
-printBtn.addEventListener("click", () => {
-  if (resultEl.classList.contains("hidden")) {
-    setStatus("Load a picture first, then export as PDF.");
+/* ── Card export (Canvas → PNG download) ─────────────────────── */
+
+function wrapText(ctx, text, x, maxWidth, lineHeight) {
+  const words = text.split(" ");
+  let line = "";
+  let y = 0;
+  const lines = [];
+
+  for (const word of words) {
+    const test = line ? `${line} ${word}` : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+
+  const totalHeight = lines.length * lineHeight;
+  for (const l of lines) {
+    ctx.fillText(l, x, y);
+    y += lineHeight;
+  }
+  return totalHeight;
+}
+
+async function loadImageAsBlob(url) {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return createImageBitmap(blob);
+}
+
+async function exportCard() {
+  if (!currentApod) {
+    setStatus("Load a picture first, then export.");
     return;
   }
-  renderDedication();
-  window.print();
-});
+
+  setStatus("Generating card...");
+  const dedication = dedicationInput.value.trim();
+
+  const W = 1920;
+  const H = 1080;
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+
+  const NAVY = "#0f1442";
+  const GOLD = "#d4af37";
+  const GOLD_SOFT = "rgba(212, 175, 55, 0.55)";
+
+  /* background */
+  ctx.fillStyle = NAVY;
+  ctx.fillRect(0, 0, W, H);
+
+  /* double border */
+  ctx.strokeStyle = GOLD;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(24, 24, W - 48, H - 48);
+  ctx.strokeStyle = GOLD_SOFT;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(32, 32, W - 64, H - 64);
+
+  /* corner accents */
+  const cLen = 50;
+  const cOff = 38;
+  ctx.strokeStyle = GOLD;
+  ctx.lineWidth = 3;
+  const corners = [
+    [cOff, cOff, cOff + cLen, cOff, cOff, cOff + cLen],
+    [W - cOff, cOff, W - cOff - cLen, cOff, W - cOff, cOff + cLen],
+    [cOff, H - cOff, cOff + cLen, H - cOff, cOff, H - cOff - cLen],
+    [W - cOff, H - cOff, W - cOff - cLen, H - cOff, W - cOff, H - cOff - cLen]
+  ];
+  for (const [x, y, x2, y2, x3, y3] of corners) {
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x3, y3);
+    ctx.stroke();
+  }
+
+  /* ornament star */
+  ctx.fillStyle = GOLD;
+  ctx.font = "28px serif";
+  ctx.textAlign = "center";
+  ctx.fillText("\u2726  \u2727  \u2726", W / 2, 80);
+
+  /* label */
+  ctx.fillStyle = GOLD_SOFT;
+  ctx.font = "500 13px 'Cinzel', Georgia, serif";
+  ctx.letterSpacing = "4px";
+  ctx.fillText("NASA ASTRONOMY PICTURE OF THE DAY", W / 2, 108);
+  ctx.letterSpacing = "0px";
+
+  /* title */
+  ctx.fillStyle = GOLD;
+  ctx.font = "bold 32px 'Cinzel', Georgia, serif";
+  ctx.textAlign = "center";
+  const titleLines = [];
+  {
+    const words = currentApod.title.split(" ");
+    let line = "";
+    for (const w of words) {
+      const test = line ? `${line} ${w}` : w;
+      if (ctx.measureText(test).width > W - 300 && line) {
+        titleLines.push(line);
+        line = w;
+      } else {
+        line = test;
+      }
+    }
+    if (line) titleLines.push(line);
+  }
+  let curY = 148;
+  for (const l of titleLines) {
+    ctx.fillText(l, W / 2, curY);
+    curY += 40;
+  }
+
+  /* date */
+  ctx.fillStyle = GOLD;
+  ctx.font = "20px 'Cinzel', Georgia, serif";
+  ctx.letterSpacing = "6px";
+  ctx.fillText(currentApod.date, W / 2, curY + 10);
+  ctx.letterSpacing = "0px";
+  curY += 30;
+
+  /* dedication */
+  if (dedication) {
+    ctx.fillStyle = "rgba(212, 175, 55, 0.8)";
+    ctx.font = "italic 18px 'Cormorant Garamond', Georgia, serif";
+    curY += 10;
+    const saved = ctx.textAlign;
+    ctx.textAlign = "center";
+    const dedLines = [];
+    {
+      const words = dedication.split(" ");
+      let line = "";
+      for (const w of words) {
+        const test = line ? `${line} ${w}` : w;
+        if (ctx.measureText(test).width > 500 && line) {
+          dedLines.push(line);
+          line = w;
+        } else {
+          line = test;
+        }
+      }
+      if (line) dedLines.push(line);
+    }
+    for (const l of dedLines) {
+      ctx.fillText(`"${l}"`, W / 2, curY);
+      curY += 24;
+    }
+    ctx.textAlign = saved;
+  }
+
+  /* image */
+  const imgTop = curY + 12;
+  const maxImgH = H - imgTop - 120;
+  const maxImgW = W - 200;
+
+  if (currentApod.media_type === "image") {
+    try {
+      const bitmap = await loadImageAsBlob(currentApod.url);
+      const scale = Math.min(maxImgW / bitmap.width, maxImgH / bitmap.height, 1);
+      const iw = bitmap.width * scale;
+      const ih = bitmap.height * scale;
+      const ix = (W - iw) / 2;
+      const iy = imgTop;
+
+      /* gold border around image */
+      ctx.strokeStyle = GOLD;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(ix - 4, iy - 4, iw + 8, ih + 8);
+
+      ctx.drawImage(bitmap, ix, iy, iw, ih);
+      curY = iy + ih + 20;
+    } catch {
+      ctx.fillStyle = GOLD_SOFT;
+      ctx.font = "16px 'Cormorant Garamond', Georgia, serif";
+      ctx.fillText("[ Image could not be embedded ]", W / 2, imgTop + 40);
+      curY = imgTop + 80;
+    }
+  } else {
+    curY = imgTop;
+  }
+
+  /* explanation (truncated to fit) */
+  const expMaxY = H - 60;
+  if (curY < expMaxY - 30) {
+    ctx.fillStyle = "rgba(212, 175, 55, 0.5)";
+    ctx.font = "15px 'Cormorant Garamond', Georgia, serif";
+    ctx.textAlign = "center";
+    const expWords = currentApod.explanation.split(" ");
+    let line = "";
+    for (const w of expWords) {
+      const test = line ? `${line} ${w}` : w;
+      if (ctx.measureText(test).width > W - 250 && line) {
+        ctx.fillText(line, W / 2, curY);
+        curY += 20;
+        line = w;
+        if (curY > expMaxY - 30) {
+          ctx.fillText(line + "...", W / 2, curY);
+          line = "";
+          break;
+        }
+      } else {
+        line = test;
+      }
+    }
+    if (line) ctx.fillText(line, W / 2, curY);
+  }
+
+  /* footer ornament */
+  ctx.fillStyle = GOLD;
+  ctx.font = "20px serif";
+  ctx.textAlign = "center";
+  ctx.fillText("\u2726  \u2727  \u2726", W / 2, H - 52);
+
+  ctx.fillStyle = GOLD_SOFT;
+  ctx.font = "italic 12px 'Cormorant Garamond', Georgia, serif";
+  ctx.letterSpacing = "3px";
+  ctx.fillText("A Cosmic Memory", W / 2, H - 34);
+  ctx.letterSpacing = "0px";
+
+  /* download */
+  canvas.toBlob((blob) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `nasa-card-${currentApod.date}.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setStatus("Card downloaded!");
+  }, "image/png");
+}
+
+printBtn.addEventListener("click", exportCard);
 
 subscribeBtn.addEventListener("click", () => handleSubscription(true));
 unsubscribeBtn.addEventListener("click", () => handleSubscription(false));
