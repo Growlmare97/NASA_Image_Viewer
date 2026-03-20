@@ -4,16 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NASA Memory Viewer</title>
+    <link rel="icon" href="https://www.nasa.gov/favicon.ico" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="container">
       <header>
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/200px-NASA_logo.svg.png"
+          alt="NASA logo"
+          class="nasa-logo"
+        />
         <h1>NASA Picture of the Day</h1>
-        <p class="subtitle">Choose any date, keep the memory, and build your own cosmos collection. ✨</p>
+        <p class="subtitle">
+          Choose any date, keep the memory, and build your own cosmos collection.
+        </p>
       </header>
 
       <section class="controls card" aria-label="APOD search controls">
+        <h2>Search</h2>
         <div class="field-group">
           <label for="date-input">Date</label>
           <input id="date-input" type="date" min="1995-06-16" required />
@@ -38,7 +47,10 @@
 
       <section class="subscription card" aria-label="email subscription controls">
         <h2>Daily Email Subscription</h2>
-        <p id="subscription-meta" class="meta">Subscribe to receive the daily APOD email. Connection status: checking…</p>
+        <p id="subscription-meta" class="meta">
+          Get the Astronomy Picture of the Day delivered to your inbox every morning.
+          <br /><span id="connection-status">Checking connection...</span>
+        </p>
         <div class="actions">
           <input id="email-input" type="email" placeholder="you@example.com" aria-label="Email address" />
           <button id="subscribe-btn" type="button">Subscribe</button>

@@ -12,6 +12,8 @@ const subscribeBtn = document.getElementById("subscribe-btn");
 const unsubscribeBtn = document.getElementById("unsubscribe-btn");
 const testEmailBtn = document.getElementById("test-email-btn");
 const subscriptionMeta = document.getElementById("subscription-meta");
+const connectionStatus = document.getElementById("connection-status");
+const subscriptionCard = document.querySelector(".subscription");
 const daysInput = document.getElementById("days-input");
 const topicFilter = document.getElementById("topic-filter");
 const loadGalleryBtn = document.getElementById("load-gallery-btn");
@@ -273,7 +275,8 @@ async function checkEmailConnection() {
     }
 
     if (data.connected) {
-      subscriptionMeta.textContent = "Subscribe to receive the daily APOD email. ✅ Email provider is connected.";
+      connectionStatus.textContent = "Email provider connected";
+      subscriptionCard.classList.add("connected");
       return;
     }
 
@@ -282,9 +285,9 @@ async function checkEmailConnection() {
       .map(([name]) => name)
       .join(", ");
 
-    subscriptionMeta.textContent = `Subscribe to receive the daily APOD email. ⚠️ Setup incomplete: missing ${missing}.`;
+    connectionStatus.textContent = `Setup incomplete — missing: ${missing}`;
   } catch (_error) {
-    subscriptionMeta.textContent = "Subscribe to receive the daily APOD email. ⚠️ Netlify email functions unavailable in local static mode.";
+    connectionStatus.textContent = "Email functions unavailable (local/static mode)";
   }
 }
 

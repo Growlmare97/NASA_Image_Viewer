@@ -26,13 +26,25 @@ async function sendEmail(to, apod) {
     throw new Error("Missing RESEND_API_KEY or EMAIL_FROM environment variable");
   }
 
+  const media = apod.media_type === "image"
+    ? `<img src="${apod.url}" alt="${apod.title}" style="max-width:100%;border-radius:8px;margin:16px 0;" />`
+    : `<p style="margin:16px 0;"><a href="${apod.url}" style="color:#4da3ff;">Watch today's video</a></p>`;
+
   const html = `
-    <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #111;">
-      <h2>NASA APOD for ${apod.date}</h2>
-      <h3>${apod.title}</h3>
-      ${apod.media_type === "image" ? `<img src="${apod.url}" alt="${apod.title}" style="max-width:100%;border-radius:8px;"/>` : `<p><a href="${apod.url}">Watch today's video</a></p>`}
-      <p>${apod.explanation}</p>
-      <p style="color:#555; font-size: 12px;">Sent by your NASA Memory Viewer subscription.</p>
+    <div style="max-width:600px;margin:0 auto;font-family:Arial,Helvetica,sans-serif;background:#0b1120;color:#e8ecf4;padding:0;border-radius:12px;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#0b3d91,#1a1a40);padding:24px 28px;text-align:center;">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/120px-NASA_logo.svg.png" alt="NASA" width="60" style="margin-bottom:8px;" />
+        <h1 style="margin:0;font-size:20px;color:#fff;letter-spacing:0.03em;">Astronomy Picture of the Day</h1>
+        <p style="margin:4px 0 0;font-size:13px;color:#8a94a8;">${apod.date}</p>
+      </div>
+      <div style="padding:24px 28px;">
+        <h2 style="margin:0 0 4px;font-size:18px;color:#fff;">${apod.title}</h2>
+        ${media}
+        <p style="font-size:14px;line-height:1.7;color:#c8cdd6;">${apod.explanation}</p>
+      </div>
+      <div style="padding:16px 28px;background:rgba(0,0,0,0.3);text-align:center;font-size:12px;color:#8a94a8;">
+        Sent by NASA Memory Viewer &bull; <a href="https://apod.nasa.gov/" style="color:#4da3ff;text-decoration:none;">apod.nasa.gov</a>
+      </div>
     </div>
   `;
 
