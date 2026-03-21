@@ -347,7 +347,8 @@ function wrapText(ctx, text, x, maxWidth, lineHeight) {
 }
 
 async function loadImageAsBlob(url) {
-  const response = await fetch(url);
+  const proxyUrl = `/.netlify/functions/image-proxy?url=${encodeURIComponent(url)}`;
+  const response = await fetch(proxyUrl);
   const blob = await response.blob();
   return createImageBitmap(blob);
 }
