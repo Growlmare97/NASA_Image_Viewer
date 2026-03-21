@@ -415,7 +415,22 @@ function shareOnWhatsApp() {
 
 /* ── Event listeners ─────────────────────────────────────────── */
 
-searchBtn.addEventListener("click", () => fetchApod(dateInput.value));
+searchBtn.addEventListener("click", () => {
+  const date = dateInput.value;
+  if (!date) {
+    setStatus("Please select a date.");
+    return;
+  }
+  if (date < "1995-06-16") {
+    setStatus("APOD only goes back to June 16, 1995.");
+    return;
+  }
+  if (date > today) {
+    setStatus("Cannot search future dates.");
+    return;
+  }
+  fetchApod(date);
+});
 loadGalleryBtn.addEventListener("click", loadGallery);
 topicFilter.addEventListener("change", renderGallery);
 randomBtn.addEventListener("click", fetchRandom);
@@ -449,36 +464,28 @@ favoriteBtn.addEventListener("click", () => {
 
 /* ── Card export (Canvas → PNG download) ─────────────────────── */
 
-function wrapText(ctx, text, x, maxWidth, lineHeight) {
-  const words = text.split(" ");
-  let line = "";
-  let y = 0;
-  const lines = [];
-
-  for (const word of words) {
-    const test = line ? `${line} ${word}` : word;
-    if (ctx.measureText(test).width > maxWidth && line) {
-      lines.push(line);
-      line = word;
-    } else {
-      line = test;
-    }
-  }
-  if (line) lines.push(line);
-
-  const totalHeight = lines.length * lineHeight;
-  for (const l of lines) {
-    ctx.fillText(l, x, y);
-    y += lineHeight;
-  }
-  return totalHeight;
-}
-
 async function loadImageAsBlob(url) {
   const proxyUrl = `/.netlify/functions/image-proxy?url=${encodeURIComponent(url)}`;
   const response = await fetch(proxyUrl);
   const blob = await response.blob();
   return createImageBitmap(blob);
+}
+
+function canvasWrapLines(ctx, text, maxWidth) {
+  const words = text.split(" ");
+  const lines = [];
+  let line = "";
+  for (const w of words) {
+    const test = line ? `${line} ${w}` : w;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = w;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
 }
 
 async function exportCard() {
@@ -487,194 +494,153 @@ async function exportCard() {
     return;
   }
 
+  const imageUrl = currentApod.media_type === "image"
+    ? currentApod.url
+    : (currentApod.thumbnail_url || null);
+
+  if (!imageUrl) {
+    setStatus("Cannot export: this APOD is a video with no thumbnail.");
+    return;
+  }
+
   setStatus("Generating card...");
   const dedication = dedicationInput.value.trim();
 
-  const W = 1920;
-  const H = 1080;
+  const W = 1200;
+  const H = 1600;
+  const PAD = 48;
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext("2d");
 
-  const NAVY = "#0f1442";
-  const GOLD = "#d4af37";
-  const GOLD_SOFT = "rgba(212, 175, 55, 0.55)";
+  const BG = "#0b1120";
+  const BLUE = "#0b3d91";
+  const WHITE = "#ffffff";
+  const LIGHT = "rgba(255,255,255,0.7)";
+  const DIM = "rgba(255,255,255,0.45)";
+  const RED = "#e03c31";
 
   /* background */
-  ctx.fillStyle = NAVY;
+  ctx.fillStyle = BG;
   ctx.fillRect(0, 0, W, H);
 
-  /* double border */
-  ctx.strokeStyle = GOLD;
-  ctx.lineWidth = 2;
-  ctx.strokeRect(24, 24, W - 48, H - 48);
-  ctx.strokeStyle = GOLD_SOFT;
-  ctx.lineWidth = 1;
-  ctx.strokeRect(32, 32, W - 64, H - 64);
+  /* top blue accent bar */
+  const grad = ctx.createLinearGradient(0, 0, W, 0);
+  grad.addColorStop(0, BLUE);
+  grad.addColorStop(1, "#1a2a6c");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, 6);
 
-  /* corner accents */
-  const cLen = 50;
-  const cOff = 38;
-  ctx.strokeStyle = GOLD;
-  ctx.lineWidth = 3;
-  const corners = [
-    [cOff, cOff, cOff + cLen, cOff, cOff, cOff + cLen],
-    [W - cOff, cOff, W - cOff - cLen, cOff, W - cOff, cOff + cLen],
-    [cOff, H - cOff, cOff + cLen, H - cOff, cOff, H - cOff - cLen],
-    [W - cOff, H - cOff, W - cOff - cLen, H - cOff, W - cOff, H - cOff - cLen]
-  ];
-  for (const [x, y, x2, y2, x3, y3] of corners) {
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x, y);
-    ctx.lineTo(x3, y3);
-    ctx.stroke();
-  }
+  /* red bottom accent */
+  ctx.fillStyle = RED;
+  ctx.fillRect(0, H - 4, W, 4);
 
-  /* ornament star */
-  ctx.fillStyle = GOLD;
-  ctx.font = "28px serif";
-  ctx.textAlign = "center";
-  ctx.fillText("\u2726  \u2727  \u2726", W / 2, 80);
-
-  /* label */
-  ctx.fillStyle = GOLD_SOFT;
-  ctx.font = "500 13px 'Cinzel', Georgia, serif";
-  ctx.letterSpacing = "4px";
-  ctx.fillText("NASA ASTRONOMY PICTURE OF THE DAY", W / 2, 108);
+  /* "NASA" label top-left */
+  ctx.fillStyle = WHITE;
+  ctx.font = "bold 14px 'Inter', Arial, sans-serif";
+  ctx.textAlign = "left";
+  ctx.letterSpacing = "6px";
+  ctx.fillText("NASA", PAD, 40);
   ctx.letterSpacing = "0px";
+
+  /* "Astronomy Picture of the Day" top-right */
+  ctx.fillStyle = DIM;
+  ctx.font = "12px 'Inter', Arial, sans-serif";
+  ctx.textAlign = "right";
+  ctx.letterSpacing = "2px";
+  ctx.fillText("ASTRONOMY PICTURE OF THE DAY", W - PAD, 40);
+  ctx.letterSpacing = "0px";
+
+  /* thin separator */
+  ctx.strokeStyle = "rgba(255,255,255,0.1)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(PAD, 56);
+  ctx.lineTo(W - PAD, 56);
+  ctx.stroke();
+
+  /* load and draw the image */
+  let curY = 72;
+  try {
+    const bitmap = await loadImageAsBlob(imageUrl);
+    const imgW = W - PAD * 2;
+    const scale = imgW / bitmap.width;
+    const imgH = Math.min(bitmap.height * scale, H * 0.55);
+    const actualScale = Math.min(imgW / bitmap.width, imgH / bitmap.height);
+    const iw = bitmap.width * actualScale;
+    const ih = bitmap.height * actualScale;
+    const ix = (W - iw) / 2;
+
+    ctx.drawImage(bitmap, ix, curY, iw, ih);
+    curY += ih + 28;
+  } catch {
+    ctx.fillStyle = DIM;
+    ctx.font = "16px 'Inter', Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("[ Image could not be loaded ]", W / 2, curY + 60);
+    curY += 120;
+  }
 
   /* title */
-  ctx.fillStyle = GOLD;
-  ctx.font = "bold 32px 'Cinzel', Georgia, serif";
-  ctx.textAlign = "center";
-  const titleLines = [];
-  {
-    const words = currentApod.title.split(" ");
-    let line = "";
-    for (const w of words) {
-      const test = line ? `${line} ${w}` : w;
-      if (ctx.measureText(test).width > W - 300 && line) {
-        titleLines.push(line);
-        line = w;
-      } else {
-        line = test;
-      }
-    }
-    if (line) titleLines.push(line);
-  }
-  let curY = 148;
+  ctx.fillStyle = WHITE;
+  ctx.font = "bold 34px 'Inter', Arial, sans-serif";
+  ctx.textAlign = "left";
+  const titleLines = canvasWrapLines(ctx, currentApod.title, W - PAD * 2);
   for (const l of titleLines) {
-    ctx.fillText(l, W / 2, curY);
-    curY += 40;
+    ctx.fillText(l, PAD, curY);
+    curY += 42;
   }
 
-  /* date */
-  ctx.fillStyle = GOLD;
-  ctx.font = "20px 'Cinzel', Georgia, serif";
-  ctx.letterSpacing = "6px";
-  ctx.fillText(currentApod.date, W / 2, curY + 10);
+  /* date + topic */
+  curY += 4;
+  ctx.fillStyle = DIM;
+  ctx.font = "14px 'Inter', Arial, sans-serif";
+  ctx.letterSpacing = "2px";
+  ctx.fillText(`${currentApod.date}   \u2022   ${currentApod.topic}`, PAD, curY);
   ctx.letterSpacing = "0px";
-  curY += 30;
+  curY += 28;
+
+  /* blue accent line under date */
+  ctx.fillStyle = BLUE;
+  ctx.fillRect(PAD, curY, 60, 3);
+  curY += 20;
 
   /* dedication */
   if (dedication) {
-    ctx.fillStyle = "rgba(212, 175, 55, 0.8)";
-    ctx.font = "italic 18px 'Cormorant Garamond', Georgia, serif";
-    curY += 10;
-    const saved = ctx.textAlign;
-    ctx.textAlign = "center";
-    const dedLines = [];
-    {
-      const words = dedication.split(" ");
-      let line = "";
-      for (const w of words) {
-        const test = line ? `${line} ${w}` : w;
-        if (ctx.measureText(test).width > 500 && line) {
-          dedLines.push(line);
-          line = w;
-        } else {
-          line = test;
-        }
-      }
-      if (line) dedLines.push(line);
-    }
+    ctx.fillStyle = "rgba(77, 163, 255, 0.85)";
+    ctx.font = "italic 16px 'Inter', Arial, sans-serif";
+    const dedLines = canvasWrapLines(ctx, `"${dedication}"`, W - PAD * 2 - 20);
     for (const l of dedLines) {
-      ctx.fillText(`"${l}"`, W / 2, curY);
-      curY += 24;
+      ctx.fillText(l, PAD + 16, curY);
+      curY += 22;
     }
-    ctx.textAlign = saved;
+    /* left accent bar for dedication */
+    ctx.fillStyle = "rgba(77, 163, 255, 0.3)";
+    ctx.fillRect(PAD, curY - dedLines.length * 22 - 4, 3, dedLines.length * 22 + 8);
+    curY += 14;
   }
 
-  /* image */
-  const imgTop = curY + 12;
-  const maxImgH = H - imgTop - 120;
-  const maxImgW = W - 200;
-
-  if (currentApod.media_type === "image") {
-    try {
-      const bitmap = await loadImageAsBlob(currentApod.url);
-      const scale = Math.min(maxImgW / bitmap.width, maxImgH / bitmap.height, 1);
-      const iw = bitmap.width * scale;
-      const ih = bitmap.height * scale;
-      const ix = (W - iw) / 2;
-      const iy = imgTop;
-
-      /* gold border around image */
-      ctx.strokeStyle = GOLD;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(ix - 4, iy - 4, iw + 8, ih + 8);
-
-      ctx.drawImage(bitmap, ix, iy, iw, ih);
-      curY = iy + ih + 20;
-    } catch {
-      ctx.fillStyle = GOLD_SOFT;
-      ctx.font = "16px 'Cormorant Garamond', Georgia, serif";
-      ctx.fillText("[ Image could not be embedded ]", W / 2, imgTop + 40);
-      curY = imgTop + 80;
+  /* explanation */
+  const expMaxY = H - 50;
+  ctx.fillStyle = LIGHT;
+  ctx.font = "15px 'Inter', Arial, sans-serif";
+  ctx.textAlign = "left";
+  const expLines = canvasWrapLines(ctx, currentApod.explanation, W - PAD * 2);
+  for (const l of expLines) {
+    if (curY > expMaxY) {
+      ctx.fillText("...", PAD, curY);
+      break;
     }
-  } else {
-    curY = imgTop;
+    ctx.fillText(l, PAD, curY);
+    curY += 22;
   }
 
-  /* explanation (truncated to fit) */
-  const expMaxY = H - 60;
-  if (curY < expMaxY - 30) {
-    ctx.fillStyle = "rgba(212, 175, 55, 0.5)";
-    ctx.font = "15px 'Cormorant Garamond', Georgia, serif";
-    ctx.textAlign = "center";
-    const expWords = currentApod.explanation.split(" ");
-    let line = "";
-    for (const w of expWords) {
-      const test = line ? `${line} ${w}` : w;
-      if (ctx.measureText(test).width > W - 250 && line) {
-        ctx.fillText(line, W / 2, curY);
-        curY += 20;
-        line = w;
-        if (curY > expMaxY - 30) {
-          ctx.fillText(line + "...", W / 2, curY);
-          line = "";
-          break;
-        }
-      } else {
-        line = test;
-      }
-    }
-    if (line) ctx.fillText(line, W / 2, curY);
-  }
-
-  /* footer ornament */
-  ctx.fillStyle = GOLD;
-  ctx.font = "20px serif";
+  /* footer */
+  ctx.fillStyle = "rgba(255,255,255,0.2)";
+  ctx.font = "11px 'Inter', Arial, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("\u2726  \u2727  \u2726", W / 2, H - 52);
-
-  ctx.fillStyle = GOLD_SOFT;
-  ctx.font = "italic 12px 'Cormorant Garamond', Georgia, serif";
-  ctx.letterSpacing = "3px";
-  ctx.fillText("A Cosmic Memory", W / 2, H - 34);
-  ctx.letterSpacing = "0px";
+  ctx.fillText("apod.nasa.gov", W / 2, H - 16);
 
   /* download */
   canvas.toBlob((blob) => {
