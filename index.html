@@ -24,6 +24,26 @@
         </p>
       </header>
 
+      <section class="explore card" aria-label="Explore APOD archive">
+        <h2>Explore</h2>
+        <div class="topic-buttons" id="topic-buttons">
+          <button type="button" class="topic-btn" data-topic="Moon">Moon</button>
+          <button type="button" class="topic-btn" data-topic="Mars">Mars</button>
+          <button type="button" class="topic-btn" data-topic="Earth">Earth</button>
+          <button type="button" class="topic-btn" data-topic="Sun">Sun</button>
+          <button type="button" class="topic-btn" data-topic="Galaxy">Galaxy</button>
+          <button type="button" class="topic-btn" data-topic="Nebula">Nebula</button>
+          <button type="button" class="topic-btn" data-topic="Stars">Stars</button>
+          <button type="button" class="topic-btn" data-topic="Black Hole">Black Hole</button>
+          <button type="button" class="topic-btn" data-topic="Comet">Comet</button>
+        </div>
+        <div class="explore-actions">
+          <button id="random-btn" type="button">Random Picture</button>
+          <button id="on-this-day-btn" type="button" class="secondary-btn">This Day Through the Years</button>
+        </div>
+        <div id="explore-grid" class="gallery-grid"></div>
+      </section>
+
       <section class="controls card" aria-label="APOD search controls">
         <h2>Search</h2>
         <div class="field-group">
@@ -81,6 +101,10 @@
         <p id="dedication-output" class="dedication-output hidden"></p>
         <div id="media-wrapper"></div>
         <p id="apod-explanation"></p>
+
+        <div class="share-actions">
+          <button id="whatsapp-btn" type="button" class="whatsapp-btn">Share on WhatsApp</button>
+        </div>
 
         <div class="print-ornament print-footer-ornament">&#10043;</div>
         <p class="print-ornament print-footer-text">A Cosmic Memory</p>

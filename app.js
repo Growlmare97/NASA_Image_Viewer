@@ -27,6 +27,11 @@ const mediaWrapper = document.getElementById("media-wrapper");
 const explanationEl = document.getElementById("apod-explanation");
 const galleryGrid = document.getElementById("gallery-grid");
 const favouritesGrid = document.getElementById("favourites-grid");
+const exploreGrid = document.getElementById("explore-grid");
+const randomBtn = document.getElementById("random-btn");
+const onThisDayBtn = document.getElementById("on-this-day-btn");
+const topicButtons = document.getElementById("topic-buttons");
+const whatsappBtn = document.getElementById("whatsapp-btn");
 
 let currentApod = null;
 let galleryItems = [];
@@ -298,9 +303,132 @@ function loadSubscription() {
   }
 }
 
+/* ── Explore: Random picture ─────────────────────────────────── */
+
+function randomDate() {
+  const start = new Date("1995-06-16");
+  const end = new Date();
+  const d = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+  return d.toISOString().split("T")[0];
+}
+
+async function fetchRandom() {
+  const date = randomDate();
+  dateInput.value = date;
+  await fetchApod(date);
+}
+
+/* ── Explore: Browse by topic ────────────────────────────────── */
+
+async function browseByTopic(topic) {
+  setStatus(`Searching for ${topic} pictures...`);
+  exploreGrid.innerHTML = "";
+
+  const dates = [];
+  for (let i = 0; i < 30; i++) {
+    dates.push(randomDate());
+  }
+  dates.sort().reverse();
+
+  const params = new URLSearchParams({ api_key: API_KEY, thumbs: "true" });
+  const fetches = dates.map((d) =>
+    fetch(`${API_URL}?${params.toString()}&date=${d}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .catch(() => null)
+  );
+
+  try {
+    const results = await Promise.all(fetches);
+    const matched = results
+      .filter((item) => item && extractTopic(item) === topic)
+      .map((item) => ({ ...item, topic }));
+
+    if (!matched.length) {
+      exploreGrid.innerHTML = `<p class='meta'>No ${topic} pictures found in this batch. Try again!</p>`;
+      setStatus("Try again for different results.");
+      return;
+    }
+
+    matched.forEach((item) => renderCard(item, exploreGrid));
+    setStatus(`Found ${matched.length} ${topic} picture(s).`);
+  } catch (error) {
+    setStatus(`Error: ${error.message}`);
+  }
+}
+
+/* ── Explore: This Day Through the Years ─────────────────────── */
+
+async function onThisDay() {
+  const selected = dateInput.value || today;
+  const month = selected.slice(5);
+  setStatus(`Loading this day through the years...`);
+  exploreGrid.innerHTML = "";
+
+  const currentYear = new Date().getFullYear();
+  const startYear = 1995;
+  const dates = [];
+
+  for (let y = currentYear; y >= startYear; y--) {
+    const d = `${y}-${month}`;
+    if (d <= today && d >= "1995-06-16") {
+      dates.push(d);
+    }
+  }
+
+  const params = new URLSearchParams({ api_key: API_KEY, thumbs: "true" });
+  const fetches = dates.map((d) =>
+    fetch(`${API_URL}?${params.toString()}&date=${d}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .catch(() => null)
+  );
+
+  try {
+    const results = await Promise.all(fetches);
+    const items = results
+      .filter((item) => item)
+      .map((item) => ({ ...item, topic: extractTopic(item) }));
+
+    if (!items.length) {
+      exploreGrid.innerHTML = "<p class='meta'>No pictures found for this day.</p>";
+      setStatus("No results.");
+      return;
+    }
+
+    items.forEach((item) => renderCard(item, exploreGrid));
+    setStatus(`${items.length} picture(s) on ${month.replace("-", "/")} through the years.`);
+  } catch (error) {
+    setStatus(`Error: ${error.message}`);
+  }
+}
+
+/* ── WhatsApp share ──────────────────────────────────────────── */
+
+function shareOnWhatsApp() {
+  if (!currentApod) {
+    setStatus("Load a picture first.");
+    return;
+  }
+  const text = `${currentApod.title} (${currentApod.date})\n\n${currentApod.explanation.slice(0, 200)}...\n\n${currentApod.url}`;
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  window.open(url, "_blank");
+}
+
+/* ── Event listeners ─────────────────────────────────────────── */
+
 searchBtn.addEventListener("click", () => fetchApod(dateInput.value));
 loadGalleryBtn.addEventListener("click", loadGallery);
 topicFilter.addEventListener("change", renderGallery);
+randomBtn.addEventListener("click", fetchRandom);
+onThisDayBtn.addEventListener("click", onThisDay);
+whatsappBtn.addEventListener("click", shareOnWhatsApp);
+
+topicButtons.addEventListener("click", (event) => {
+  const btn = event.target.closest(".topic-btn");
+  if (!btn) return;
+  document.querySelectorAll(".topic-btn").forEach((b) => b.classList.remove("active"));
+  btn.classList.add("active");
+  browseByTopic(btn.dataset.topic);
+});
 
 favoriteBtn.addEventListener("click", () => {
   if (!currentApod) {
@@ -566,7 +694,7 @@ subscribeBtn.addEventListener("click", () => handleSubscription(true));
 unsubscribeBtn.addEventListener("click", () => handleSubscription(false));
 testEmailBtn.addEventListener("click", sendTestEmail);
 
-for (const target of [galleryGrid, favouritesGrid]) {
+for (const target of [galleryGrid, favouritesGrid, exploreGrid]) {
   target.addEventListener("click", (event) => {
     const button = event.target.closest(".open-btn");
     if (!button) {
